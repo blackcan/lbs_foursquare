@@ -1,0 +1,90 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Foursquare API DEMO</title>
+	<!--
+	<meta property="og:title" content="Device Pixel Ratio" />
+	<meta property="og:url" content="http://blog.othree.net/log/2012/10/28/device-pixel-ratio/" />
+	<meta property="og:type" content="article" />
+	<meta property="og:description" content=" 這兩天又對 blog 做了一些加強..." />
+	<meta property="og:image" content="http://farm9.staticflickr.com/8463/8128174518_387a27b3dd.jpg" />
+
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:title" content="Device Pixel Ratio" />
+	<meta name="twitter:url" content="http://blog.othree.net/log/2012/10/28/device-pixel-ratio/" />
+	<meta name="twitter:description" content=" 這兩天又對 blog 做了一些加強..." />
+	<meta name="twitter:image" content="http://farm9.staticflickr.com/8463/8128174518_387a27b3dd.jpg" />
+
+	-->
+	<link href="css/bootstrap.css" rel="stylesheet">
+	<script src="js/bootstrap.min.js"></script>
+	<script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<script language="Javascript" type="text/javascript" src="http://wadehammes.com/dewey-beach/map.js"></script>
+	<script src="js/jquery.geocomplete.min.js"></script>
+	
+	<style type="text/css">
+		#map_canvas{
+      		position: absolute;
+      		top: 0;
+      		bottom: 0;
+      		left: 0;
+      		right: 0;
+      		z-index: 0;
+      	}
+      	#rgba{
+      		//opacity:0.7;
+      	}
+		#google_map_back_container{
+			width: 100%;
+			height: 600px;
+		}
+		#input_container{
+			position: absolute;
+			margin: 10px 0 0 80px;
+			z-index: 100;
+		}
+		#searchCountry{
+			font-size: 24px;
+			height: 32px;
+			width: 480px;
+			line-height: 32px;
+			z-index: 100;
+		}
+	</style>
+	
+	<script>
+		var map;
+      	function initialize() {
+	        var mapOptions = {
+	          	zoom: 6,
+	          	center: new google.maps.LatLng(-34.397, 150.644),
+	          	mapTypeId: google.maps.MapTypeId.ROADMAP
+	        };
+        	map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
+      	}
+
+      	google.maps.event.addDomListener(window, 'load', initialize);
+
+      	$(document).ready(function(){
+      		$("#find").click(function(){
+          		$("#searchCountry").trigger("geocode");
+        	});
+      		$("#searchCountry").geocomplete({
+  				map: "#map_canvas"
+		});
+      });
+    </script>
+</head>
+<body>
+
+	<div id="rgba"><div id="map_canvas"></div></div>
+	<div id="input_container">
+		<form>
+            <input id="searchCountry" size="64" type="text" placeholder="去哪裡">
+            <input id="find" class="btn" type="button" value="find" />
+        </form>
+	</div>
+	
+</body> 
+</html>

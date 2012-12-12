@@ -1,0 +1,419 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Foursquare API DEMO</title>
+	<!--
+	<meta property="og:title" content="Device Pixel Ratio" />
+	<meta property="og:url" content="http://blog.othree.net/log/2012/10/28/device-pixel-ratio/" />
+	<meta property="og:type" content="article" />
+	<meta property="og:description" content=" 這兩天又對 blog 做了一些加強..." />
+	<meta property="og:image" content="http://farm9.staticflickr.com/8463/8128174518_387a27b3dd.jpg" />
+
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:title" content="Device Pixel Ratio" />
+	<meta name="twitter:url" content="http://blog.othree.net/log/2012/10/28/device-pixel-ratio/" />
+	<meta name="twitter:description" content=" 這兩天又對 blog 做了一些加強..." />
+	<meta name="twitter:image" content="http://farm9.staticflickr.com/8463/8128174518_387a27b3dd.jpg" />
+
+	-->
+	<script language="Javascript" type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<script language="Javascript" type="text/javascript" src="http://wadehammes.com/dewey-beach/map.js"></script>
+	<script language="Javascript" type="text/javascript" src="js/jquery-ui-1.9.2.custom.min.js"></script>
+	<script language="Javascript" type="text/javascript" src="js/jquery.geocomplete.min.js"></script>
+	<script language="Javascript" type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places"></script>
+	<script language="Javascript" type="text/javascript" src="js/bootstrap.min.js"></script>
+	
+	<link href="css/bootstrap.css" rel="stylesheet">
+	<link href="css/more.css" rel="stylesheet">
+	<style name="impostor_size">
+        .marker + li { border-top-width:0px; }
+    </style>
+	<script>
+		// http://developers.facebook.com/docs/reference/plugins/like/
+
+		// setting
+		var foursquare_client_secret = "4K50AJO4KN45Y5YHQIUJD5W5PAGPFRDBEWSJ40OI042GRGCW&v=20120731";
+      	var foursquare_client_id = "WQ204IDJUQ41IR5ZN2ZZFBLMIDQOEDBW2BWYE2T4GOMFVIXP";
+      	var foursquare_ll = "40.7,-74";
+      	var foursquare_radius = "1000";
+
+      	// google map 
+		var map;
+      	function initialize() {
+	        var mapOptions = {
+	          	zoom: 6,
+	          	center: new google.maps.LatLng(-34.397, 150.644),
+	          	mapTypeControl: false,
+	          	mapTypeId: google.maps.MapTypeId.ROADMAP
+	        };
+        	map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
+      	}
+
+      	google.maps.event.addDomListener(window, 'load', initialize);
+
+      $(document).ready(function(){
+
+      	var foursquare_data_name = [];
+		var foursquare_data_lat = [];
+		var foursquare_data_lng = [];
+		var foursquare_data_location = [];
+		var foursquare_data_checkin = [];
+		var foursquare_data_categories = [];
+
+		$(".map_more").hide();
+
+      	
+      	var stylesheet = $('style[name=impostor_size]')[0].sheet,
+            rule = stylesheet.rules ? stylesheet.rules[0].style : stylesheet.cssRules[0].style,
+            setPadding = function(atHeight) {
+                rule.cssText = 'border-top-width: '+atHeight+'px'; 
+            };
+            
+      	// venue_pool_list sortable
+      	$( "#sortable" ).sortable({
+      		 'placeholder':'marker',
+            'start':function(ev, ui) {
+                setPadding(ui.item.height());
+            },
+            'stop':function(ev, ui) {
+                var next = ui.item.next();
+                next.css({'-moz-transition':'none', '-webkit-transition':'none', 'transition':'none'});
+                setTimeout(next.css.bind(next, {'-moz-transition':'border-top-width 0.1s ease-in', '-webkit-transition':'border-top-width 0.1s ease-in', 'transition':'border-top-width 0.1s ease-in'}));
+            }
+      	});
+        $( "#sortable" ).disableSelection();
+      	
+      	$(".navibar_suggest_tag").live("click",function(){
+      		$("#navibar_search").val($(this).text());
+      		$('#navibar_search_form').trigger('submit');
+
+      	});
+
+      	
+      	$(".place_list_name").click(function(){
+      		$("#navibar_search").val($(this).text());
+      		$('#navibar_search_form').trigger('submit');
+      	});
+      	
+      	$(".btn_detail").click(function(){
+      		var trigger_id = $(this).attr("id") + "_detail";
+      		$("#"+trigger_id).fadeIn();
+      	});
+      	
+
+      	$("#btn_click_cancel").click(function(){
+      		$(".map_more").fadeOut();
+      	});
+      	
+
+		var venue_pool_element_li = document.createElement("li");
+
+		$("#btn_click_add").click(function(){
+
+			var google_map_stat_api_size = "280x64";
+			var google_map_stat_api_sensor = "false";
+			var google_map_stat_api_maptype = "roadmap";
+			var google_map_stat_api_zoom = "15";
+
+			var google_map_stat_api = "http://maps.google.com/maps/api/staticmap?center=Brooklyn+Bridge,New+York,NY&zoom=" + google_map_stat_api_zoom + "&size=" + google_map_stat_api_size + "&maptype=" + google_map_stat_api_maptype + " &markers=color:red%7Ccolor:red%7Clabel:C%7C40.718217,-73.998284&sensor=" + google_map_stat_api_sensor;
+			
+
+			var const_text = '<hr/><li class="ui-state-default"><div class="venue_list_pool_element row-fluid"><div class="span2 place_list_name"><a href="#">香港中環</a></div><div class="span2"><img src="https://irs0.4sqi.net/img/user/64x64/blank_boy.png" /></div><div class="span6"><img src="http://maps.google.com/maps/api/staticmap?center=Brooklyn+Bridge,New+York,NY&zoom=14&size=280x64&maptype=roadmap&markers=color:blue%7Clabel:S%7C40.702147,-74.015794&markers=color:green%7Clabel:G%7C40.711614,-74.012318&markers=color:red%7Ccolor:red%7Clabel:C%7C40.718217,-73.998284&sensor=false" /></div><div class="span2"><button class="btn btn-small btn-danger btn_detail" ><i class="icon-trash icon-white"></i></button></div></div></li>';
+
+			$(".main_container_left ul").append(const_text);
+			$(".map_more").fadeOut();
+      		
+
+		});
+
+      	$(".map_canvas_container_element").live("click",function(){
+      		$(".map_more").fadeIn();
+      		var gid = $(this).attr("id");
+      		
+      		$("#suggest_venue_name").text("").append(foursquare_data_name[gid]);
+      		$("#suggest_venue_lat_lng").text("").append(foursquare_data_lat[gid] + "," + foursquare_data_lng[gid]);
+      		$("#suggest_venue_addr").text("").append(foursquare_data_location[gid]);
+      		$("#map_more_checkin_counter").text("").append(foursquare_data_checkin[gid] + " checkins");
+
+      		reset_custom_google_map_marker(foursquare_data_lat[gid],foursquare_data_lng[gid],16);
+      	});
+
+
+
+	 	function reset_custom_google_map_marker(lat,lng,zoom)
+	 	{
+	 		//var myLatlng = new google.maps.LatLng(-25.363882,131.044922);
+		 	var myLatlng = new google.maps.LatLng(lat,lng);
+
+  			var marker = new google.maps.Marker({
+  				position: myLatlng
+			});
+
+			marker.setMap(map);  
+			map.setCenter(myLatlng);
+			map.setZoom(zoom);
+	 	}
+
+
+      	$('#navibar_search_form').submit(function() {
+
+      		$(".map_more").hide();
+
+      		var search_val = $("#navibar_search").val();
+      		$("#suggest_venue_name").text("").text($("#navibar_search").val());
+
+      		var geocoder = new google.maps.Geocoder();
+	        geocoder.geocode( {'address': search_val }, function(data, status) {
+    	    	
+    	    	var ya = data[0]['geometry']['location']['Ya'];
+       		 	var za = data[0]['geometry']['location']['Za'];
+
+       		 	console.log("lat,lng = " + ya + "," + za);
+       		 	
+       		 	reset_custom_google_map_marker(ya,za,14);
+       		 	
+	  			var foursquare_gmap_ll = ya + "," + za;
+	  			var foursquare_api = "https://api.foursquare.com/v2/venues/explore?ll=" + foursquare_gmap_ll + "&radius=" + foursquare_radius + "&client_id="+ foursquare_client_id +"&client_secret=" + foursquare_client_secret + "&section=topPicks";
+
+	  			//foursquare
+	  			$.getJSON(foursquare_api + "&callback=?",
+				{
+					format: "json"
+				},
+				function(data) {
+					$("#map_canvas_container").text("");
+
+					console.log(data['response']['groups'][0]['items']);
+					var tt = data['response']['groups'][0]['items'];
+					
+					foursquare_data_name = [];
+					foursquare_data_lat = [];
+					foursquare_data_lng = [];
+					foursquare_data_location = [];
+					foursquare_data_checkin = [];
+					foursquare_data_categories = [];
+
+
+					for(var i=0;i<tt.length;i++)
+					{
+						console.log(data['response']['groups'][0]['items'][i]['venue']['name']);
+
+						if (i<10){
+
+							var venue_detail_name = data['response']['groups'][0]['items'][i]['venue']['name'];
+							var venue_detail_address = data['response']['groups'][0]['items'][i]['venue']['location']['address'];
+							var venue_detail_city = data['response']['groups'][0]['items'][i]['venue']['location']['city'];
+							var venue_detail_country = data['response']['groups'][0]['items'][i]['venue']['location']['country'];
+							var venue_detail_checkin = data['response']['groups'][0]['items'][i]['venue']['stats']['checkinsCount'];
+							var venue_detail_categories = data['response']['groups'][0]['items'][i]['venue']['categories']['0']['name'];
+							var venue_detail_lat = data['response']['groups'][0]['items'][i]['venue']['location']['lat'];
+							var venue_detail_lng = data['response']['groups'][0]['items'][i]['venue']['location']['lng'];
+
+							var venue_detail_location = venue_detail_address + " " + venue_detail_city + " " + venue_detail_country;
+
+							foursquare_data_name.push(venue_detail_name);
+							foursquare_data_location.push(venue_detail_location);
+							foursquare_data_lat.push(venue_detail_lat);
+							foursquare_data_lng.push(venue_detail_lng);
+							foursquare_data_checkin.push(venue_detail_checkin);
+							foursquare_data_categories.push(venue_detail_categories);
+
+							//
+							var foursquare_tag_container = document.createElement("div");
+							var foursquare_tag = document.createElement("div");
+							var foursquare_tag_text = document.createElement("span");
+							$(foursquare_tag_text).text(data['response']['groups'][0]['items'][i]['venue']['name']);
+
+							var venue_list_pool_img = document.createElement("img");
+							$(venue_list_pool_img).addClass("venue_list_pool_img");
+							$(venue_list_pool_img).attr("src","https://foursquare.com/img/categories_v2/food/default_bg_32.png");
+							
+							$(foursquare_tag).addClass("venue_list_pool_element_left");
+							//$(foursquare_tag).attr("value",venue_detail_lat+","+venue_detail_lng);
+							$(foursquare_tag).attr("z-index","100");
+
+
+							//$(foursquare_tag).addClass("btn").addClass("btn_tag_list");
+							$(foursquare_tag).append(venue_list_pool_img);
+							$(foursquare_tag).append(foursquare_tag_text);
+							$(foursquare_tag_container).addClass("map_canvas_container_element");
+							$(foursquare_tag_container).attr("id",i);
+							$(foursquare_tag_container).append(foursquare_tag)
+							$("#map_canvas_container").append(foursquare_tag_container);
+
+							//alert(data['response']['groups'][0]['items'][i]['venue']['location']['lat']);
+							//alert(data['response']['groups'][0]['items'][i]['venue']['location']['lon']);
+
+							
+
+						}
+						
+					}
+					
+				});
+
+
+      	  	});
+
+      		
+  			return false;
+		});
+
+      });
+    </script>
+</head>
+<body>
+	<!-- Navbar ================================================== -->
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container navibar_top">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand" href="./index.html">Bootstrap</a>
+          <div class="nav-collapse collapse">
+            <form id="navibar_search_form" class="navbar-search pull-left">
+  				<input id="navibar_search" type="text" class="search-query" placeholder="Search">
+			</form>
+          </div>
+          <div id="navibar_login_section">
+          	<img id="navibar_login_section_img" width="32" height="32" src="https://irs0.4sqi.net/img/user/64x64/blank_boy.png" /><span id="navi_login_text">使用者登入</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="navibar_second">
+        <div class="container foursquare_container">
+          <button class="btn btn-info navibar_suggest_tag" >旺角</button>
+          <button class="btn btn-info navibar_suggest_tag" >姦殺嘴</button>
+          <button class="btn btn-info navibar_suggest_tag" >北角</button>
+        </div>
+      </div>
+      
+    </div>
+    <!-- Navbar ================================================== -->
+	
+	<div id="map_canvas"></div>
+	<div id="map_canvas_container"></div>
+		
+    <div class="container-fluid main_container">
+    	
+    	<div class="row-fluid map_more">
+    		<div class="span2">
+				<img src="https://ss0.4sqi.net/img/categories_v2/shops/food_foodcourt_bg_64-7ac0a9355ef743c1d4891765abd68e1f.png" />
+    		</div>
+    		
+    		<div class="span6">
+    			<div id="suggest_venue_name">旺角</div>
+    			<div id="suggest_venue_addr">地址地址</div>
+	    		<div id="suggest_venue_lat_lng">京緯度</div>
+	    		<button id="btn_click_add" class="btn" >Add</button>
+    		<button id="btn_click_cancel" class="btn" >Cancel</button>
+    		</div>
+    		<div id="map_more_checkin_counter" class="span4">12 checkins</div>
+    		
+    	</div>
+
+  		<div class="row-fluid">
+    		<div class="span8 main_container_left">
+    			<ul id="sortable">
+
+	      			 <li class="ui-state-default">
+	      			 	<div class="venue_list_pool_element row-fluid">		 		
+    						<div class="span2 place_list_name"><a href="#">香港中環</a></div>
+	      					<div class="span2">
+	      						<img src="https://irs0.4sqi.net/img/user/64x64/blank_boy.png" />	      							
+	      					</div>
+	      					<div class="span6">
+	      						<img src="http://maps.google.com/maps/api/staticmap?center=Brooklyn+Bridge,New+York,NY&zoom=15&size=280x64&maptype=roadmap
+	&markers=color:blue%7Clabel:S%7C40.702147,-74.015794&markers=color:green%7Clabel:G%7C40.711614,-74.012318
+	&markers=color:red%7Ccolor:red%7Clabel:C%7C40.718217,-73.998284&sensor=false" />
+							<div class="venue_list_pool_addr">
+									香港中環九如坊3號
+								</div>
+	      					</div>
+	      					<div class="span2">
+	      						<button class="btn btn-small btn-danger btn_detail" ><i class="icon-trash icon-white"></i></button>
+	      					</div>
+						</div>
+	      			</li>
+
+	      			<li class="ui-state-default">
+	      			 	<div class="venue_list_pool_element row-fluid">		 		
+    						<div class="span2 place_list_name"><a href="#">旺角</a></div>
+	      					<div class="span2">
+	      						<img src="https://irs0.4sqi.net/img/user/64x64/blank_boy.png" />	      							
+	      					</div>
+	      					<div class="span6">
+	      						<img src="http://maps.google.com/maps/api/staticmap?center=Brooklyn+Bridge,New+York,NY&zoom=14&size=280x64&maptype=roadmap
+	&markers=color:blue%7Clabel:S%7C40.702147,-74.015794&markers=color:green%7Clabel:G%7C40.711614,-74.012318
+	&markers=color:red%7Ccolor:red%7Clabel:C%7C40.718217,-73.998284&sensor=false" />
+							<div class="venue_list_pool_addr">
+									香港中環九如坊3號
+								</div>
+	      					</div>
+	      					<div class="span2">
+	      						<button class="btn btn-small btn-danger btn_detail" ><i class="icon-trash icon-white"></i></button>
+	      					</div>
+						</div>
+	      			</li>
+
+	      			<li class="ui-state-default">
+	      			 	<div class="venue_list_pool_element row-fluid">		 		
+    						<div class="span2 place_list_name"><a href="#">上環</a></div>
+	      					<div class="span2">
+	      						<img src="https://ss0.4sqi.net/img/categories_v2/food/asian_bg_64-f648befe2cd40ec9d794568e380fae41.png" />	      							
+	      					</div>
+	      					<div class="span6">
+	      						<img src="http://maps.google.com/maps/api/staticmap?center=Brooklyn+Bridge,New+York,NY&zoom=14&size=280x64&maptype=roadmap
+	&markers=color:blue%7Clabel:S%7C40.702147,-74.015794&markers=color:green%7Clabel:G%7C40.711614,-74.012318
+	&markers=color:red%7Ccolor:red%7Clabel:C%7C40.718217,-73.998284&sensor=false" />
+								<div class="venue_list_pool_addr">
+									香港中環九如坊3號
+								</div>
+	      					</div>
+	      					<div class="span2">
+	      						<button class="btn btn-small btn-danger btn_detail" ><i class="icon-trash icon-white"></i></button>
+	      					</div>
+						</div>
+	      			</li>
+	      			
+	      			<li class="ui-state-default">
+	      			 	<div class="venue_list_pool_element row-fluid">
+    						<div class="span2 place_list_name"><a href="#">蘭桂坊</a></div>
+	      					
+	      					<div class="span2">
+	      						<img src="https://ss0.4sqi.net/img/categories_v2/food/mediterranean_bg_64-424c43fd4baceead8dd92bb62d30b515.png" />	      							
+	      					</div>
+	      					<div class="span6">
+	      						<img src="http://maps.google.com/maps/api/staticmap?center=Brooklyn+Bridge,New+York,NY&zoom=14&size=280x64&maptype=roadmap
+	&markers=color:blue%7Clabel:S%7C40.702147,-74.015794&markers=color:green%7Clabel:G%7C40.711614,-74.012318
+	&markers=color:red%7Ccolor:red%7Clabel:C%7C40.718217,-73.998284&sensor=false" />
+								<div class="venue_list_pool_addr">
+									香港中環九如坊3號
+								</div>
+	      					</div>
+	      					<div class="span2">
+	      						<button class="btn btn-small btn-danger btn_detail" ><i class="icon-trash icon-white"></i></button>
+	      					</div>
+						</div>
+	      			</li>
+
+	      		</ul>
+    		</div>
+    		<div class="span4 main_container_right">
+      			<div id="sidebar_venue_counter">18</div> 個地點
+      			<div id="sidebar_venue_counter">2.6</div> 公里
+
+    		</div>
+  		</div>
+	</div>
+
+
+
+
+</body> 
+</html>
