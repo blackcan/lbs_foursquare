@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src='http://api.tiles.mapbox.com/mapbox.js/v0.6.7/mapbox.js'></script>
+	<script language="Javascript" type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<script language="Javascript" type="text/javascript" src="http://wadehammes.com/dewey-beach/map.js"></script>
+	<script language="Javascript" type="text/javascript" src="js/jquery-ui-1.9.2.custom.min.js"></script>
+	<script language="Javascript" type="text/javascript" src="js/jquery.geocomplete.min.js"></script>
+	<script language="Javascript" type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places"></script>
+	<script language="Javascript" type="text/javascript" src="js/bootstrap.min.js"></script>
+	
+	<link href="css/bootstrap.css" rel="stylesheet">
+	<link href="css/more.css" rel="stylesheet">
+  <link href='http://api.tiles.mapbox.com/mapbox.js/v0.6.7/mapbox.css' rel='stylesheet' />
+</head>
+<body>
+
+<!-- Navbar ================================================== -->
+  <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container navibar_top">
+        <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="brand" href="./index.html">Bootstrap</a>
+        <div class="nav-collapse collapse">
+          <form id="navibar_search_form" class="navbar-search pull-left">
+        <input id="navibar_search" type="text" class="search-query" placeholder="Search">
+    </form>
+        </div>
+        <div id="navibar_login_section">
+          <img id="navibar_login_section_img" width="32" height="32" src="https://irs0.4sqi.net/img/user/64x64/blank_boy.png" /><span id="navi_login_text">使用者登入</span>
+        </div>
+      </div>
+    </div>
+
+    
+  </div>
+  
+<!-- Map ================================================== -->
+<div id='map'></div>
+
+<!--Result View -->
+<div id='resultsContainer'>
+  <div id='resultsView'>
+    <ul class="recommendationList">
+    </ul>
+  </div>
+</div>
+
+
+<script>
+
+  // setting
+  var foursquare_client_secret = "4K50AJO4KN45Y5YHQIUJD5W5PAGPFRDBEWSJ40OI042GRGCW&v=20120731";
+  var foursquare_client_id = "WQ204IDJUQ41IR5ZN2ZZFBLMIDQOEDBW2BWYE2T4GOMFVIXP";
+  var foursquare_ll = "40.7,-74";
+  var foursquare_radius = "1000";
+  
+  // Create a map
+  var map = mapbox.map('map');
+  // Create a layer
+  var layer = mapbox.layer().id('tmcw.map-2f4ad161');
+  // Add the layer
+  map.addLayer(layer);
+  // Zoom in to level 14
+  map.zoom(14);
+  map.center({ lat:25.091075, lon:121.55983449999997 });
+  // Mark Layer
+  // Create an empty markers layer
+  var markerLayer = mapbox.markers.layer();
+
+  // Add interaction to this marker layer. This
+  // binds tooltips to each marker that has title
+  // and description defined.
+  mapbox.markers.interaction(markerLayer);
+  map.addLayer(markerLayer);
+
+
+  // Attribute
+  map.ui.attribution.add()
+      .content('<a href="http://mapbox.com/about/maps">Terms &amp; Feedback</a>');
+
+  // Run easings when links are clicked
+
+  /*document.getElementById('toronto').onclick = function() {
+    map.ease.location({ lat: 43.6, lon: -79.4 }).zoom(10).optimal();
+    return false;
+  }
+
+  document.getElementById('chicago').onclick = function() {
+    map.ease.location({ lat: 41.9, lon: -87.6 }).zoom(10).optimal();
+    return false;
+  }
+
+  document.getElementById('dc').onclick = function() {
+    map.ease.location({ lat: 38.9, lon: -77 }).zoom(10).optimal();
+    return false;
+  }*/
+
+  var foursquare_data_name = [];
+  var foursquare_data_lat = [];
+  var foursquare_data_lng = [];
+  var foursquare_data_location = [];
+  var foursquare_data_checkin = [];
+  var foursquare_data_categories = [];
+
+
+  $('#navibar_search_form').submit(function() {
+
+      var search_val = $("#navibar_search").val();
+      $("#suggest_venue_name").text("").text($("#navibar_search").val());
+
+      var geocoder = new google.maps.Geocoder();
+      geocoder.geocode( {'address': search_val }, function(data, status) {
+
+      var ya = data[0]['geometry']['location']['Ya'];
+      var za = data[0]['geometry']['location']['Za'];
+
+        console.log("lat,lng = " + ya + "," + za);
+
+        //map.ease.location({ lat: ya, lon: za }).zoom(14).optimal(3.0, 1.5);
+        map.center({ lat: ya, lon: za});
+        
+        var foursquare_gmap_ll = ya + "," + za;
+        var foursquare_api = "https://api.foursquare.com/v2/venues/explore?ll=" + foursquare_gmap_ll + "&radius=" + foursquare_radius + "&client_id="+ foursquare_client_id +"&client_secret=" + foursquare_client_secret + "&section=topPicks";
+
+        //foursquare
+        $.getJSON(foursquare_api + "&callback=?",
+        {
+          format: "json"
+          },
+          function(data) {
+					$("#map_canvas_container").text("");
+
+					console.log(data['response']['groups'][0]['items']);
+					var tt = data['response']['groups'][0]['items'];
+					
+					foursquare_data_name = [];
+					foursquare_data_lat = [];
+					foursquare_data_lng = [];
+					foursquare_data_location = [];
+					foursquare_data_checkin = [];
+					foursquare_data_categories = [];
+
+
+					for(var i=0;i<tt.length;i++)
+					{
+						console.log(data['response']['groups'][0]['items'][i]['venue']['name']);
+
+						if (i<10){
+
+							var venue_detail_name = data['response']['groups'][0]['items'][i]['venue']['name'];
+							var venue_detail_address = data['response']['groups'][0]['items'][i]['venue']['location']['address'];
+							var venue_detail_city = data['response']['groups'][0]['items'][i]['venue']['location']['city'];
+							var venue_detail_country = data['response']['groups'][0]['items'][i]['venue']['location']['country'];
+							var venue_detail_checkin = data['response']['groups'][0]['items'][i]['venue']['stats']['checkinsCount'];
+							var venue_detail_categories = data['response']['groups'][0]['items'][i]['venue']['categories']['0']['name'];
+							var venue_detail_lat = data['response']['groups'][0]['items'][i]['venue']['location']['lat'];
+							var venue_detail_lng = data['response']['groups'][0]['items'][i]['venue']['location']['lng'];
+
+							var venue_detail_location = venue_detail_address + " " + venue_detail_city + " " + venue_detail_country;
+
+              markerLayer.add_feature({
+                    geometry: {
+                        coordinates: [venue_detail_lng, venue_detail_lat]
+                    },
+                    properties: {
+                        'marker-color': '#000',
+                        'marker-symbol': 'star-stroked',
+                        title: venue_detail_name,
+                        description: venue_detail_address
+                    }
+                  });
+              
+              $('.recommendationList').append($('<li class="card singleRecommendation hasPhoto noFacepile">')
+                  .append($('<div class="venueBlock">')
+                    .append($('<div class="venueDetails">')
+                      .append($('<div class="venueName">')
+                        .text(venue_detail_name))
+                      .append($('<div class="venueAddressData">')
+                        .text(venue_detail_address))
+                    .append($('<div class="photoContainer">')
+                      .append('<img class="photo" src="https://irs1.4sqi.net/img/general/300x300/RQWLFPH2W4AUKXX0JIUC5SSUNW4ACC1JTC3HZ0ZA5WC5DCO3.jpg" photo-id="4dd7ecbaa12d431f8bab4e88" width="100" height="100" alt="">')))));
+							foursquare_data_name.push(venue_detail_name);
+							foursquare_data_location.push(venue_detail_location);
+							foursquare_data_lat.push(venue_detail_lat);
+							foursquare_data_lng.push(venue_detail_lng);
+							foursquare_data_checkin.push(venue_detail_checkin);
+							foursquare_data_categories.push(venue_detail_categories);
+            }
+          }
+        });
+      });
+      return false;
+    });
+
+</script>
+</body>
+</html>

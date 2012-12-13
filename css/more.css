@@ -1,170 +1,147 @@
 /*
-	map_canvas 
+	map 
 */
-#map_canvas_container{
-	position: absolute;
-	width: 30%;
-	height: 400px;
-	top: 120px;
-	left: 70%;
-	background-color: #FFFFFF;
-	z-index: 10;
-	background: rgba(255, 255, 255, 0.4);
-}
-.map_canvas_container_element:hover{
-	background: rgba(70, 130, 180, 0.9);	
-	cursor: pointer;
-}
-#map_canvas{
-	position: relative;
-	width: 100%;
-	height: 400px;
-	top: 120px;
-	}
+#map { position:absolute; top:40px; bottom:0; width:100%; }
 
-.map_more{
-	min-height: 20px;
-	background-color: #EBF3EB; 
-	padding: 2px 0 2px 0;
-}
-#map_more_checkin_counter{
-	text-align: right;
-	padding: 5px 50px 5px 0px;
-	font-size: 60px;
-	font-style: italic;
-	color: #DDDDDD;
-}
+#map-ui {
+  position:absolute;
+  top:50px;left:10px;
+  z-index:100;
+    }
+    #map-ui ul {
+      list-style:none;
+      margin:0;padding:0;
+      }
+      #map-ui a {
+        font-size:13px;
+        background:#FFF;
+        color:#3C4E5A;
+        display:block;
+        margin:0;padding:0;
+        border:1px solid #BBB;
+        border-bottom-width:0;
+        min-width:138px;
+        padding:10px;
+        text-decoration:none;
+        }
+        #map-ui a:hover { background:#ECF5FA; }
+        #map-ui li:last-child a {
+          border-bottom-width:1px;
+          -webkit-border-radius:0 0 3px 3px;
+          border-radius:0 0 3px 3px;
+        }
+        #map-ui li:first-child a {
+          -webkit-border-radius:3px 3px 0 0;
+          border-radius:3px 3px 0 0;
+        }
 
 /*
 	general_style 
 */
-body{
-	background-color: #F0F1F2;
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{
+  margin:0;
+  padding:0;
+  border:0;
+}
+body{line-height:1;}
+ol,ul{list-style:none;}
+li {
+  display: list-item;
+  text-align: -webkit-match-parent;
 }
 
 /*
-	navibar 
+ * result_container
+ */
+#resultsContainer{
+  margin:0 0 0 20px;
+  position:relative;
+  width:500px;
+  max-height:500px;
+  overflow:hidden;
+  z-index:2;
+  -moz-box-shadow:rgba(0, 0, 0, 0.5) 0 0 3px 0px;
+  -webkit-box-shadow:rgba(0, 0, 0, 0.5) 0 0 3px 0px;
+  box-shadow:rgba(0, 0, 0, 0.5) 0 0 3px 0px;
+  }
+  #resultsView{
+    background:#ccc;
+    background:rgba(0, 0, 0, 0.2);
+    padding:10px 10px 1px;
+    padding-top:100px;
+    max-height:490px;
+    position:relative;
+    overflow:auto;
+    z-index:50;
+    -moz-box-shadow:inset rgba(0, 0, 0, 0.1) 0 0 2px 0px;
+    -webkit-box-shadow:inset rgba(0, 0, 0, 0.1) 0 0 2px 0px;
+    box-shadow:inset rgba(0, 0, 0, 0.1) 0 0 2px 0px;
+  }
+
+/* 
+ recommandList 
 */
-.navibar_top{
-	padding: 10px 0px 10px 0px;
-}
-.navibar_second{
-	background-color: #DDDDDD;
-	padding: 10px 0px 10px 0px;
-}
 
-#navibar_search{
-	width:480px;
+#resultsView li.card{
+  background:#fff;
+  margin-bottom:10px;
+  padding:10px;
+  position:relative;
+  width:460px;
+  -moz-box-shadow:rgba(0, 0, 0, 0.4) 0 1px 3px 0px;
+  -webkit-box-shadow:rgba(0, 0, 0, 0.4) 0 1px 3px 0px;
+  box-shadow:rgba(0, 0, 0, 0.4) 0 1px 3px 0px;
+  -moz-border-radius:3px;
+  -webkit-border-radius:3px;
+  border-radius:3px;
 }
-#navibar_login_section{
-	padding-right: 0;
-	padding-left: 0;
-	margin-left: 20px;
-	float: right;
-	font-weight: bold;
+#resultsView li.card:hover,#resultsView li.card.highlight,#resultsView li.card.select{
+  -moz-box-shadow:rgba(0, 0, 0, 0.8) 0 1px 3px 0px;
+  -webkit-box-shadow:rgba(0, 0, 0, 0.8) 0 1px 3px 0px;
+  box-shadow:rgba(0, 0, 0, 0.8) 0 1px 3px 0px;
 }
-#navibar_login_section:hover{
-	color: #FFFFFF;
+#resultsView li.card.hasPhoto.noFacepile .detail{
+  width:337px;
 }
-#navibar_login_section_img{
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
+#resultsView .venueBlock{
+  background:#f7f7f7;
+  background:rgba(0, 0, 0, 0.03);
+  border-bottom:1px solid #f7f7f7;
+  border-bottom:1px solid rgba(0, 0, 0, 0.03);
+  margin:-10px -10px 0;
+  min-height:48px;
+  padding:10px;
+  overflow:hidden;
 }
-.navibar_suggest_tag{
-	margin: 5px 5px 5px 5px;
+#resultsView .venueBlock .venueDetails{
+  width:418px;
 }
-#navi_login_text{
-	padding: 0px 0px 0px 10px;
+#resultsView .venueBlock .specialBanner{
+  display:block;
+  height:62px;
+  position:absolute;
+  right:-5px;
+  top:-5px;
+  width:62px;
+  z-index:100;
 }
-
-
-/*
-	main 
-*/
-.main_container{
-	margin: 150px 0 0 0;
-	width: 960px;
-	min-height: 800px;
-	line-height: 40px;
-	position:absolute;
-	left: 10%;
-	background-color: #EEEEEE;
-	text-align: center;
-	-webkit-border-radius: 3px;
-	-moz-border-radius: 3px;
-  	border-radius: 3px;
+#resultsView .photoContainer{
+  cursor:pointer;
+  line-height:0;
+  position:absolute;
+  right:5px;
+  top:5px;
 }
-.main_container_right{
-	background-color: #F0F4F5;
-	min-height: 1000px;
-	border: 1px solid #CCCCCC;
+#resultsView .photoContainer img{
+  height:50px;
+  width:50px;
+  border:1px solid #e3e3e3;
+  background:#fff;
+  padding:3px;
+  -moz-box-shadow:rgba(0, 0, 0, 0.1) 0 0 2px 0px;
+  -webkit-box-shadow:rgba(0, 0, 0, 0.1) 0 0 2px 0px;
+  box-shadow:rgba(0, 0, 0, 0.1) 0 0 2px 0px;
+  -moz-border-radius:2px;
+  -webkit-border-radius:2px;
+  border-radius:2px;
 }
-.main_container_left{
-	background-color: #FFFFFF;
-	min-height: 1000px;
-	border-top: 1px solid #CCCCCC;
-	border-left: 1px solid #CCCCCC;
-	border-right: 1px solid #CCCCCC;
-}
-
-/*
-	venue_list_pool_element 
-*/
-.venue_list_pool_element{
-	text-align: left;
-	padding: 10px 0px 10px 0px;	
-}
-.venue_list_pool_addr{
-	padding: 4px 0px 4px 0px;
-}
-.venue_list_pool_img{
-	padding: 5px 5px 5px 5px;
-}
-.venue_list_pool_element_left{
-	width: 100%;
-	padding: 5px 5px 5px 5px;
-	background: rgba(255, 255, 255, 0.8);
-}
-ul{
-	list-style: none;
-}
-/*
-	sidebar
-*/
-#sidebar_venue_counter{
-	padding: 64px 0 32px 0;
-	font-size: 128px;
-}
-
-
-#suggest_venue_name{
-	text-align: left;
-}
-#suggest_venue_addr{
-	text-align: left;
-}
-#suggest_venue_lat_lng{
-	text-align: left;
-}
-
-li{
-	display:block;
-	position:relative;
-	padding:12px 6px;
-	z-index:1;
-}      
-li:after{
-	display:block;
-	position:absolute;
-	height:100%;
-	width:100%;
-	top:0px;
-	left:0px;
-	content:' ';
-	border-radius:6px;
-	z-index:-1;
-}
- 
-
- .marker { opacity:0.0; }
